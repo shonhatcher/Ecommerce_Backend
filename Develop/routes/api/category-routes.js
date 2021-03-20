@@ -6,7 +6,11 @@ const { Category, Product } = require('../../models');
 router.get('/', async (req, res) => {
   try {
     const categoryData = await Category.findAll ({
-      include: [{model: Category}],
+      include: {
+        model: Product,
+        attributes: ['']
+        
+      }],
     }) 
     res.status(200).json(categoryData);
   } catch(err) {
@@ -52,7 +56,7 @@ router.put('/:id', async (req, res) => {
       },
     });
     if(!categoryData[0]) {
-      res.status(404).json({ message: 'No user with this id!'});
+      res.status(404).json({ message: 'No category found with this id!'});
       return;
     }
     res.status(200).json(categoryData);
@@ -70,7 +74,7 @@ router.delete('/:id', async (req, res) => {
       },
     });
     if(!categoryData) {
-      res.status (404).json ({message: 'No user with this id'});
+      res.status (404).json ({message: 'No category found with this id'});
       return;
     }
     res.status(200).json(categoryData);
