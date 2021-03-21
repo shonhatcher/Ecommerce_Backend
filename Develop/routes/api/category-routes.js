@@ -20,25 +20,31 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', (req, res) => {
   // find one category by its `id` value
   // be sure to include its associated Products
-router.get('/:id', async (req, res) => {
-  try {
-    const categoryData = await Category.findByPK(req.params.id, {
-      include: {
-        model: Product,
-        attributes: ['id','product_name','price','stock','category_id']
-      },
-    });
-    if (!categoryData) {
-      res.status(404).json({message: 'No category found with that id!'});
-      return;
+  Category.findOne({
+    where: {
+      id: req.params.id
+    },
+    include: {
+      model: Product,
+      attributes: ['id', 'product_name', 'price', 'stock', 'category_id']
     }
-    res.status(200).json(categoryData);
-  } catch(err) {
-    res.status(500).json(err);
-  }   
+  })
+    .then(categoryData => {
+      if(!categoryData) {
+        res.status(404).json({message: 'No categories found for this id!'});
+        return;
+      }
+      res.json(categoryData);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err)
+    });
 });
+
 
 // create a new category
 router.post('/', async (req, res) => {
@@ -72,9 +78,9 @@ router.put('/:id', async (req, res) => {
 // delete a category by its `id` value
 router.delete('/:id', async (req, res) => {
   try {
-    const locationData = await Category.destroy ({
+    const categoryData = await Category.destroy ({
       where: {
-        id: params.id,
+        id: req.params.id,
       },
     });
     if(!categoryData) {
@@ -86,5 +92,27 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+
+// router.delete('/:id', (req, res) => {
+//   // delete on tag by its `id` value
+//   Category.destroy({
+//     where: {
+//       id: req.params.id
+//     }
+//   })
+//   .then(categoryData => {
+//     if (!categoryData) {
+//       res.status(404).json({message: 'No category found with this id!'});
+//       return;
+//     }
+//     res.json(categoryData);
+//   })
+//   .catch(err =>{
+//     console.log(err);
+//     res.status(500).json(err);
+//   });
+// });
+
 
 module.exports = router;

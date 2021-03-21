@@ -9,19 +9,20 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', async (req, res) => {
   try {
     const productData = await Product.findAll({ 
+      // attributes: ['id','product_name', 'price', 'stock', 'category_id'],
     include: [
       { 
       model: Category,
-      attributes: ['id','name']
+      attributes: ['id','category_name']
       },
       {
       model: Tag,
       attributes: ['id','tag_name']
       },
-      {
-      model: ProductTag,
-      attributes: ['id','product_id','tag_id']
-      },
+      // {
+      // model: ProductTag,
+      // attributes: ['id','product_id','tag_id']
+      // },
     ],
   });
     res.status(200).json(productData);
@@ -30,37 +31,70 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+router.get('/:id', (req, res) => {
+  // find a single product by its `id`
+  // be sure to include its associated Category and Tag data
+  Product.findOne({
+    where: {
+      id: req.params.id
+    },
+    attributes: ['id', 'product_name', 'price', 'stock'],
+    include: [
+      {
+        model: Category,
+        attributes: ['category_name']
+      },
+      {
+        model: Tag,
+        attributes: ['tag_name']
+      }
+    ]
+  })
+    .then(productData => {
+      if (!productData) {
+        res.status(404).json({message: 'No product found with this id'});
+        return;
+      }
+      res.json(productData);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+});
+
 // get one product
 // find a single product by its `id`
 // be sure to include its associated Category and Tag data
-router.get('/:id', async (req, res) => {
-  try{
-    const productData = await Product.findByPK(req.params.id, {
-      include: [
-        { 
-          model: Category,
-          attributes: ['id','name']
-          },
-          {
-          model: Tag,
-          attributes: ['id','tag_name']
-          },
-          {
-          model: ProductTag,
-          attributes: ['id','product_id','tag_id']
-          },
-        ],
-  });
-    if(!productData) {
-      res.status(404).json({message: 'No product with this id!'});
-      return;
-    }
-    res.status(200).json(productData);
-  } catch(err) {
-    res.status(500).json (err)
-  }
+// router.get('/:id', async (req, res) => {
+//   try{
+//     const productData = await Product.findByPK(req.params.id, {
+//       include: [
+//         { 
+//           model: Category,
+//           attributes: ['id','category_name']
+//           },
+//           {
+//           model: Tag,
+//           attributes: ['id','tag_name']
+//           },
+//           // {
+//           // model: ProductTag,
+//           // attributes: ['id','product_id','tag_id']
+//           // },
+//         ],
+//   });
+//     if(!productData) {
+//       res.status(404).json({message: 'No product with this id!'});
+//       return;
+//     }
+//     res.status(200).json(productData);
+//   } catch(err) {
+//     res.status(500).json (err)
+//   }
  
-});
+// });
 
 router.post('/', async (req,res) => {
   Product.create({
